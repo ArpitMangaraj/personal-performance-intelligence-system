@@ -2,7 +2,7 @@ import joblib
 import pandas as pd
 
 # Load trained model
-model = joblib.load("productivity_model.pkl")
+model = joblib.load("Models/productivity_model.pkl")
 
 
 # ---------------------------

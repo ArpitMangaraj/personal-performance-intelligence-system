@@ -1,4 +1,11 @@
+import os
 import ollama
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+MODEL_NAME = os.getenv("OLLAMA_MODEL", "gemma3:4b")
 
 
 def generate_ai_advice(student_data, productivity_score):
@@ -6,28 +13,45 @@ def generate_ai_advice(student_data, productivity_score):
     Uses local LLM to generate intelligent productivity advice.
     """
 
+    # Safe dictionary access
+    study = student_data.get("study", 0)
+    sleep = student_data.get("sleep", 0)
+    screen = student_data.get("screen", 0)
+    mood = student_data.get("mood", 0)
+    exercise = student_data.get("exercise", 0)
+    caffeine = student_data.get("caffeine", 0)
+    expenses = student_data.get("expenses", 0)
+
     prompt = f"""
-    You are an elite performance coach.
+You are an elite productivity performance coach.
 
-    A student has the following lifestyle data:
+Carefully analyze the student's lifestyle data and productivity score.
 
-    Study Hours: {student_data['study']}
-    Sleep Hours: {student_data['sleep']}
-    Screen Time: {student_data['screen']}
-    Mood: {student_data['mood']}
-    Exercise Minutes: {student_data['exercise']}
-    Caffeine Cups: {student_data['caffeine']}
-    Daily Expenses: {student_data['expenses']}
+Student Data:
+- Study Hours: {study}
+- Sleep Hours: {sleep}
+- Screen Time: {screen}
+- Mood Level: {mood}
+- Exercise Minutes: {exercise}
+- Caffeine Cups: {caffeine}
+- Daily Expenses: {expenses}
 
-    Their predicted productivity score is: {productivity_score}
+Predicted Productivity Score: {productivity_score:.2f}
 
-    Give practical, science-backed advice to improve their productivity.
-    Keep it structured and actionable.
-    """
+Your Tasks:
+1. Identify 2 strengths.
+2. Identify 2 weaknesses.
+3. Provide 3 specific actionable improvements.
+4. Keep it structured and professional.
+"""
 
-    response = ollama.chat(
-        model="gemma3:4b",
-        messages=[{"role": "user", "content": prompt}]
-    )
+    try:
+        response = ollama.chat(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-    return response['message']['content']
+        return response["message"]["content"]
+
+    except Exception as e:
+        return f"AI service temporarily unavailable.\n\nError: {str(e)}"
